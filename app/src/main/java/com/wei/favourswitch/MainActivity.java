@@ -1,7 +1,6 @@
 package com.wei.favourswitch;
 
 import android.app.Activity;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
 
 public class MainActivity extends Activity {
@@ -11,6 +10,5 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        VectorDrawable a;
     }
 }
