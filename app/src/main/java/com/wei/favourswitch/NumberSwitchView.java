@@ -9,6 +9,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -31,6 +32,8 @@ public class NumberSwitchView extends View {
     AnimatorSet mAnimatorSet;
 
     Paint viewPaint;
+
+    List<Integer> diffPositionList;
 
     public NumberSwitchView(Context context) {
         super(context);
@@ -61,12 +64,26 @@ public class NumberSwitchView extends View {
         viewPaint.setTextSize(40);
         viewPaint.setColor(Color.RED);
 
-        canvas.drawText(String.valueOf(oldNum),10,10,viewPaint);
+        Paint.FontMetrics fontMetrics = viewPaint.getFontMetrics();
+        float fontHeight = fontMetrics.bottom - fontMetrics.top;
+
+        Rect bounds = new Rect();
+        String oldStr = String.valueOf(oldNum);
+
+        viewPaint.getTextBounds(oldStr, 0, oldStr.length(), bounds);
+        canvas.drawText(oldStr, 0, fontHeight, viewPaint);
+
+        String newStr = String.valueOf(newNum);
+        canvas.drawText(newStr, 0, fontHeight + viewPaint.getFontSpacing(), viewPaint);
+
+
     }
 
     private void init() {
         viewPaint = new Paint();
         viewPaint.setAntiAlias(true);
+
+        diffPositionList = new ArrayList<>();
 
         oldNum = 123;
         newNum = 124;
