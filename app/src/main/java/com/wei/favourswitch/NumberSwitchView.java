@@ -147,7 +147,7 @@ public class NumberSwitchView extends View {
                 if (direction == 0) {
                     canvas.drawText(subStr, x_index, 100 + fontHeight, viewPaint);
                 } else {
-                    canvas.drawText(subStr, x_index, 100 + fontHeight , viewPaint);
+                    canvas.drawText(subStr, x_index, 100 + fontHeight - viewPaint.getFontSpacing() * direction * (1f-ratio) , viewPaint);
                 }
             }
 
@@ -171,7 +171,7 @@ public class NumberSwitchView extends View {
                 this, "ratio", 1f, 0f);
         moveAnim.setRepeatCount(-1);
 //        moveAnim.setRepeatMode(Animation.RESTART);
-        moveAnim.setDuration(1000);
+        moveAnim.setDuration(2000);
         moveAnim.setInterpolator(new LinearInterpolator());
         animators.add(moveAnim);
 
