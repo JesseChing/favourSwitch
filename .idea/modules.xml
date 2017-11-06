@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/FavourSwitch.iml" filepath="$PROJECT_DIR$/FavourSwitch.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/favourSwitch.iml" filepath="$PROJECT_DIR$/favourSwitch.iml" />
     </modules>
   </component>
 </project>

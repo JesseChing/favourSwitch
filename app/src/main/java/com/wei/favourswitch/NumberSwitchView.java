@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
@@ -86,7 +87,7 @@ public class NumberSwitchView extends View {
         diffPositionList = new ArrayList<>();
 
         oldNum = 123;
-        newNum = 21250;
+        newNum = 22350;
     }
 
     private void compareStr(){
@@ -119,9 +120,9 @@ public class NumberSwitchView extends View {
         }
 
 
-//        RectF rect = new RectF(0,0,viewPaint.measureText(newStr),fontHeight);
-//        canvas.save();
-//        canvas.clipRect(rect);
+        RectF rect = new RectF(0, 10, viewPaint.measureText(newStr), fontHeight+10);
+        canvas.save();
+        canvas.clipRect(rect);
 
         float x_index = 0;
         for (int i = 0; i < maxLength; i++) {
@@ -145,21 +146,21 @@ public class NumberSwitchView extends View {
 
             if (!"".equals(subStr)) {
                 if (direction == 0) {
-                    canvas.drawText(subStr, x_index, 100 + fontHeight, viewPaint);
+                    canvas.drawText(subStr, x_index, fontHeight, viewPaint);
                 } else {
-                    canvas.drawText(subStr, x_index, 100 + fontHeight - viewPaint.getFontSpacing() * direction * (1f-ratio) , viewPaint);
+                    canvas.drawText(subStr, x_index, fontHeight - viewPaint.getFontSpacing() * direction * (1f - ratio), viewPaint);
                 }
             }
 
             if (!"".equals(subStr2) && direction != 0) {
-                canvas.drawText(subStr2, x_index, 100 + fontHeight + viewPaint.getFontSpacing() * direction * ratio, viewPaint);
+                canvas.drawText(subStr2, x_index, fontHeight + viewPaint.getFontSpacing() * direction * ratio, viewPaint);
             }
 
             x_index += strWidths[i];
 
         }
 
-//        canvas.restore();
+        canvas.restore();
 
 
     }
@@ -171,7 +172,7 @@ public class NumberSwitchView extends View {
                 this, "ratio", 1f, 0f);
         moveAnim.setRepeatCount(-1);
 //        moveAnim.setRepeatMode(Animation.RESTART);
-        moveAnim.setDuration(2000);
+        moveAnim.setDuration(1000);
         moveAnim.setInterpolator(new LinearInterpolator());
         animators.add(moveAnim);
 
