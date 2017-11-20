@@ -13,6 +13,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,18 +22,21 @@ import java.util.List;
  * Created by Administrator on 2017/10/26.
  */
 
-public class NumberSwitchView extends View {
+public class NumberSwitchView extends View implements Animator.AnimatorListener {
 
     int oldNum;
     int newNum;
 
-    float ratio = 1f;
+    float ratio = 0f;
 
     AnimatorSet mAnimatorSet;
 
     Paint viewPaint;
 
-    List<Integer> diffPositionList;
+//    List<Integer> diffPositionList;
+
+    float fontHeight;
+    RectF contentRect;
 
     public NumberSwitchView(Context context) {
         super(context);
@@ -60,69 +64,62 @@ public class NumberSwitchView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        viewPaint.setTextSize(40);
-        viewPaint.setColor(Color.RED);
-
-//        Paint.FontMetrics fontMetrics = viewPaint.getFontMetrics();
-//        float fontHeight = fontMetrics.bottom - fontMetrics.top;
-//
-//        Rect bounds = new Rect();
-//        String oldStr = String.valueOf(oldNum);
-//
-//        viewPaint.getTextBounds(oldStr, 0, oldStr.length(), bounds);
-//        canvas.drawText(oldStr, 0, fontHeight, viewPaint);
-//
-//        String newStr = String.valueOf(newNum);
-//        canvas.drawText(newStr, 0, fontHeight + viewPaint.getFontSpacing(), viewPaint);
-
-        drawNum(canvas);
-
+        if (ratio == 0 || oldNum == newNum) {
+            canvas.drawText(String.valueOf(newNum), 0, fontHeight, viewPaint);
+        } else {
+            drawAnimatorNum(canvas);
+        }
 
     }
 
     private void init() {
+        oldNum = 0;
+        newNum = 22350;
+
         viewPaint = new Paint();
         viewPaint.setAntiAlias(true);
-
-        diffPositionList = new ArrayList<>();
-
-        oldNum = 123;
-        newNum = 22350;
-    }
-
-    private void compareStr(){
-
-    }
-
-    private void drawNum(Canvas canvas) {
-        String oldStr = String.valueOf(oldNum);
-        String newStr = String.valueOf(newNum);
 
         viewPaint.setTextSize(40);
         viewPaint.setColor(Color.RED);
 
+
+//        diffPositionList = new ArrayList<>();
+
         Paint.FontMetrics fontMetrics = viewPaint.getFontMetrics();
-        float fontHeight = fontMetrics.bottom - fontMetrics.top;
+        fontHeight = fontMetrics.bottom - fontMetrics.top;
+
+        contentRect = new RectF(0, 10, viewPaint.measureText(String.valueOf(newNum)), fontHeight + 10);
+
+
+    }
+
+
+    private void drawAnimatorNum(Canvas canvas) {
+        String oldStr = String.valueOf(oldNum);
+        String newStr = String.valueOf(newNum);
+
+
+
         float[] strWidths; //获取每个字符的宽度
 
         short direction = 0;
         int maxLength = 0;
         if (oldNum > newNum) {
-            direction = -1;
+//            direction = -1;
             maxLength = oldStr.length();
             strWidths = new float[maxLength];
             viewPaint.getTextWidths(oldStr, strWidths);
         } else {
-            direction = 1;
+//            direction = 1;
             maxLength = newStr.length();
             strWidths = new float[maxLength];
             viewPaint.getTextWidths(newStr, strWidths);
         }
 
 
-        RectF rect = new RectF(0, 10, viewPaint.measureText(newStr), fontHeight+10);
+
         canvas.save();
-        canvas.clipRect(rect);
+        canvas.clipRect(contentRect);
 
         float x_index = 0;
         for (int i = 0; i < maxLength; i++) {
@@ -174,6 +171,7 @@ public class NumberSwitchView extends View {
 //        moveAnim.setRepeatMode(Animation.RESTART);
         moveAnim.setDuration(1000);
         moveAnim.setInterpolator(new LinearInterpolator());
+        moveAnim.addListener(this);
         animators.add(moveAnim);
 
         mAnimatorSet = new AnimatorSet();
@@ -184,6 +182,11 @@ public class NumberSwitchView extends View {
         if (mAnimatorSet == null) {
             initAnimation();
         }
+
+        if (oldNum == newNum) {
+            return;
+        }
+
         mAnimatorSet.start();
     }
 
@@ -197,5 +200,41 @@ public class NumberSwitchView extends View {
             this.ratio = ratio;
             postInvalidate();
         }
+    }
+
+    public int getNewNum() {
+        return newNum;
+    }
+
+    public void setNewNum(int newNum, boolean animation) {
+        if (this.newNum == newNum){
+            return;
+        }
+        this.newNum = newNum;
+        if (animation){
+            startAnimation();
+        }
+    }
+
+    @Override
+    public void onAnimationStart(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+//        Toast.makeText(getContext(), "结束", Toast.LENGTH_SHORT).show();
+        oldNum = newNum;
+//        invalidate();
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+        oldNum = newNum;
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
+
     }
 }
