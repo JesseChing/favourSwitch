@@ -5,15 +5,16 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,8 @@ import java.util.List;
 
 public class NumberSwitchView extends View implements Animator.AnimatorListener {
 
-    int oldNum;
-    int newNum;
+    int oldNum = 0; //旧的值
+    int newNum = 0; //新的值
 
     float ratio = 0f;
 
@@ -38,25 +39,28 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
     float fontHeight;
     RectF contentRect;
 
+    int textSize = 10;
+    int textColor = Color.BLACK;
+
     public NumberSwitchView(Context context) {
         super(context);
-        init();
+        init(context, null);
     }
 
     public NumberSwitchView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public NumberSwitchView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public NumberSwitchView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs);
     }
 
 
@@ -72,14 +76,50 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 
     }
 
-    private void init() {
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+//        if (w!= oldw || h!=oldh){
+//
+//        }
+
+        Log.d("onSizeChanged", "onSizeChanged被调用");
+    }
+
+    private void init(Context context, AttributeSet attrs) {
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumberSwitchView);
+        for (int i = 0; i < a.getIndexCount(); i++) {
+            int attr = a.getIndex(i);
+            switch (attr) {
+                case R.styleable.NumberSwitchView_number: {
+                    newNum = a.getInt(attr, newNum);
+                    break;
+                }
+
+                case R.styleable.NumberSwitchView_android_textSize: {
+                    textSize = a.getDimensionPixelSize(attr, textSize);
+                    break;
+                }
+
+                case R.styleable.NumberSwitchView_android_textColor: {
+                    textColor = a.getColor(attr, textColor);
+                    break;
+                }
+
+                default: {
+
+                }
+            }
+        }
+        a.recycle();
+
         oldNum = 0;
         newNum = 22350;
 
         viewPaint = new Paint();
         viewPaint.setAntiAlias(true);
 
-        viewPaint.setTextSize(40);
+        viewPaint.setTextSize(textSize);
         viewPaint.setColor(Color.RED);
 
 
@@ -88,7 +128,8 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         Paint.FontMetrics fontMetrics = viewPaint.getFontMetrics();
         fontHeight = fontMetrics.bottom - fontMetrics.top;
 
-        contentRect = new RectF(0, 10, viewPaint.measureText(String.valueOf(newNum)), fontHeight + 10);
+        contentRect = new RectF(0, 0, viewPaint.measureText(String.valueOf(newNum)), fontHeight);
+        contentRect.offsetTo(-getPaddingRight(), -getPaddingBottom());
 
 
     }
@@ -121,7 +162,7 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         canvas.save();
         canvas.clipRect(contentRect);
 
-        float x_index = 0;
+        float x_index = contentRect.left;
         for (int i = 0; i < maxLength; i++) {
             String subStr = "", subStr2 = "";
             if (i < oldStr.length()) {
@@ -143,14 +184,14 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 
             if (!"".equals(subStr)) {
                 if (direction == 0) {
-                    canvas.drawText(subStr, x_index, fontHeight, viewPaint);
+                    canvas.drawText(subStr, x_index, contentRect.bottom, viewPaint);
                 } else {
-                    canvas.drawText(subStr, x_index, fontHeight - viewPaint.getFontSpacing() * direction * (1f - ratio), viewPaint);
+                    canvas.drawText(subStr, x_index, contentRect.bottom - viewPaint.getFontSpacing() * direction * (1f - ratio), viewPaint);
                 }
             }
 
             if (!"".equals(subStr2) && direction != 0) {
-                canvas.drawText(subStr2, x_index, fontHeight + viewPaint.getFontSpacing() * direction * ratio, viewPaint);
+                canvas.drawText(subStr2, x_index, contentRect.bottom + viewPaint.getFontSpacing() * direction * ratio, viewPaint);
             }
 
             x_index += strWidths[i];

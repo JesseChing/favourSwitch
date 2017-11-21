@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NumberSwitchView">
+        <attr name="number" format="integer" />
+        <attr name="icon" format="reference" />
+        <attr name="android:textSize"/>
+        <attr name="android:textColor" />
+    </declare-styleable>
+</resources>
