@@ -9,7 +9,9 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,6 +30,8 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
     int oldNum = 0; //旧的值
     int newNum = 0; //新的值
 
+    int maxNum;
+
     float ratio = 0f;
 
     AnimatorSet mAnimatorSet;
@@ -37,10 +41,13 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 //    List<Integer> diffPositionList;
 
     float fontHeight;
-    RectF contentRect;
+    Rect contentRect;
 
     int textSize = 10;
     int textColor = Color.BLACK;
+
+    Drawable iconDrawable;
+    Rect iconRect;
 
     public NumberSwitchView(Context context) {
         super(context);
@@ -68,11 +75,28 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        canvas.save();
+        canvas.translate(getPaddingLeft(), getPaddingTop());
+
+        if (iconDrawable != null) {
+            drawIcon(canvas);
+
+            canvas.save();
+            canvas.translate(iconRect.width(), 0);
+        }
+
+
         if (ratio == 0 || oldNum == newNum) {
             canvas.drawText(String.valueOf(newNum), 0, fontHeight, viewPaint);
         } else {
             drawAnimatorNum(canvas);
         }
+
+        if (iconDrawable != null) {
+            canvas.restore();
+        }
+
+        canvas.restore();
 
     }
 
@@ -83,7 +107,75 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 //
 //        }
 
-        Log.d("onSizeChanged", "onSizeChanged被调用");
+        Log.d("onSizeChanged", "w:" + w + "h:" + h);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width = 0;
+        int height = 0;
+
+        int minWidth = getMinimumWidth();
+        int minHeight = getMinimumHeight();
+
+        switch (widthMode) {
+            case MeasureSpec.UNSPECIFIED:
+            case MeasureSpec.AT_MOST: {
+                width = (int) contentRect.width() + getPaddingLeft() + getPaddingRight();
+                if (iconRect != null) {
+                    width += iconRect.width();
+                }
+
+                width = Math.max(width, minWidth);
+                break;
+            }
+
+            case MeasureSpec.EXACTLY: {
+                width = widthSize;
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        switch (heightMode) {
+            case MeasureSpec.UNSPECIFIED:
+            case MeasureSpec.AT_MOST: {
+                height = Math.round(fontHeight) + getPaddingTop() + getPaddingBottom();
+                height = Math.max(height, iconRect.height());
+                height = Math.max(height, minHeight);
+                break;
+            }
+
+            case MeasureSpec.EXACTLY: {
+                height = heightSize;
+                break;
+            }
+
+            default:
+                break;
+        }
+
+
+        setMeasuredDimension(width, height);
+    }
+
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+
+        if (iconDrawable != null && iconDrawable.isStateful()) {
+            iconDrawable.setState(getDrawableState());
+        }
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -106,6 +198,11 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
                     break;
                 }
 
+                case R.styleable.NumberSwitchView_icon: {
+                    iconDrawable = a.getDrawable(attr);
+                    break;
+                }
+
                 default: {
 
                 }
@@ -113,8 +210,8 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         }
         a.recycle();
 
-        oldNum = 0;
-        newNum = 22350;
+        oldNum = 22350;
+        newNum = 22351;
 
         viewPaint = new Paint();
         viewPaint.setAntiAlias(true);
@@ -122,18 +219,37 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         viewPaint.setTextSize(textSize);
         viewPaint.setColor(Color.RED);
 
-
-//        diffPositionList = new ArrayList<>();
-
         Paint.FontMetrics fontMetrics = viewPaint.getFontMetrics();
-        fontHeight = fontMetrics.bottom - fontMetrics.top;
+        fontHeight = Math.abs(fontMetrics.bottom - fontMetrics.top);
 
-        contentRect = new RectF(0, 0, viewPaint.measureText(String.valueOf(newNum)), fontHeight);
-        contentRect.offsetTo(-getPaddingRight(), -getPaddingBottom());
 
+        maxNum = Math.max(oldNum, newNum);
+//        contentRect = new RectF(0, 0, viewPaint.measureText(String.valueOf(maxNum)), fontHeight);
+        contentRect = new Rect();
+        String maxNumStr = String.valueOf(maxNum);
+        viewPaint.getTextBounds(String.valueOf(maxNum),0,maxNumStr.length(),contentRect);
+
+
+        if (iconDrawable != null) {
+            int iconWidth = iconDrawable.getIntrinsicWidth();
+            int iconHeight = iconDrawable.getIntrinsicHeight();
+            iconRect = new Rect(0, 0, iconWidth, iconHeight);
+            iconDrawable.setBounds(iconRect);
+
+            float diffHeight = Math.abs(contentRect.height() - iconRect.height());
+            contentRect.offset(0, Math.round(diffHeight * 0.5f));
+        }
+
+        setSelected(true);
 
     }
 
+
+    private void drawIcon(Canvas canvas) {
+
+        iconDrawable.draw(canvas);
+
+    }
 
     private void drawAnimatorNum(Canvas canvas) {
         String oldStr = String.valueOf(oldNum);
@@ -146,23 +262,27 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         short direction = 0;
         int maxLength = 0;
         if (oldNum > newNum) {
-//            direction = -1;
             maxLength = oldStr.length();
             strWidths = new float[maxLength];
             viewPaint.getTextWidths(oldStr, strWidths);
         } else {
-//            direction = 1;
             maxLength = newStr.length();
             strWidths = new float[maxLength];
             viewPaint.getTextWidths(newStr, strWidths);
         }
 
 
+//        canvas.drawRect(contentRect,viewPaint);
+        canvas.drawLine(contentRect.left, contentRect.top, contentRect.right, contentRect.top, viewPaint);
+        canvas.drawLine(contentRect.left, contentRect.bottom, contentRect.right, contentRect.bottom, viewPaint);
 
         canvas.save();
         canvas.clipRect(contentRect);
 
         float x_index = contentRect.left;
+        float height = contentRect.bottom;
+
+
         for (int i = 0; i < maxLength; i++) {
             String subStr = "", subStr2 = "";
             if (i < oldStr.length()) {
@@ -184,14 +304,14 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 
             if (!"".equals(subStr)) {
                 if (direction == 0) {
-                    canvas.drawText(subStr, x_index, contentRect.bottom, viewPaint);
+                    canvas.drawText(subStr, x_index, height, viewPaint);
                 } else {
-                    canvas.drawText(subStr, x_index, contentRect.bottom - viewPaint.getFontSpacing() * direction * (1f - ratio), viewPaint);
+                    canvas.drawText(subStr, x_index, height - viewPaint.getFontSpacing() * direction * (1f - ratio), viewPaint);
                 }
             }
 
             if (!"".equals(subStr2) && direction != 0) {
-                canvas.drawText(subStr2, x_index, contentRect.bottom + viewPaint.getFontSpacing() * direction * ratio, viewPaint);
+                canvas.drawText(subStr2, x_index, height + viewPaint.getFontSpacing() * direction * ratio, viewPaint);
             }
 
             x_index += strWidths[i];
