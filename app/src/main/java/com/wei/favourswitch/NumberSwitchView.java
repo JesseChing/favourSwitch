@@ -10,7 +10,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -225,10 +224,11 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 
         maxNum = Math.max(oldNum, newNum);
 //        contentRect = new RectF(0, 0, viewPaint.measureText(String.valueOf(maxNum)), fontHeight);
-        contentRect = new Rect();
-        String maxNumStr = String.valueOf(maxNum);
-        viewPaint.getTextBounds(String.valueOf(maxNum),0,maxNumStr.length(),contentRect);
 
+        Rect tempRect = new Rect();
+        String maxNumStr = String.valueOf(maxNum);
+        viewPaint.getTextBounds(maxNumStr, 0, maxNumStr.length(), tempRect);
+        contentRect = new Rect(0, 0, (int) viewPaint.measureText(maxNumStr), tempRect.height());
 
         if (iconDrawable != null) {
             int iconWidth = iconDrawable.getIntrinsicWidth();
@@ -255,6 +255,7 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         String oldStr = String.valueOf(oldNum);
         String newStr = String.valueOf(newNum);
 
+        canvas.getMatrix();
 
 
         float[] strWidths; //获取每个字符的宽度
@@ -273,8 +274,8 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 
 
 //        canvas.drawRect(contentRect,viewPaint);
-        canvas.drawLine(contentRect.left, contentRect.top, contentRect.right, contentRect.top, viewPaint);
-        canvas.drawLine(contentRect.left, contentRect.bottom, contentRect.right, contentRect.bottom, viewPaint);
+//        canvas.drawLine(contentRect.left, contentRect.top, contentRect.right, contentRect.top, viewPaint);
+//        canvas.drawLine(contentRect.left, contentRect.bottom, contentRect.right, contentRect.bottom, viewPaint);
 
         canvas.save();
         canvas.clipRect(contentRect);
@@ -368,11 +369,11 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
     }
 
     public void setNewNum(int newNum, boolean animation) {
-        if (this.newNum == newNum){
+        if (this.newNum == newNum) {
             return;
         }
         this.newNum = newNum;
-        if (animation){
+        if (animation) {
             startAnimation();
         }
     }
