@@ -26,10 +26,10 @@ import java.util.List;
 
 public class NumberSwitchView extends View implements Animator.AnimatorListener {
 
+    private boolean debug = false;
+
     int oldNum = 0; //旧的值
     int newNum = 0; //新的值
-
-    int maxNum;
 
     float ratio = 0f;
 
@@ -209,7 +209,7 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         }
         a.recycle();
 
-        oldNum = 22350;
+        oldNum = 123;
         newNum = 22351;
 
         viewPaint = new Paint();
@@ -222,13 +222,12 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         fontHeight = Math.abs(fontMetrics.bottom - fontMetrics.top);
 
 
-        maxNum = Math.max(oldNum, newNum);
-//        contentRect = new RectF(0, 0, viewPaint.measureText(String.valueOf(maxNum)), fontHeight);
+//        maxNum = Math.max(oldNum, newNum);
+//        Rect tempRect = new Rect();
+//        String maxNumStr = String.valueOf(maxNum);
+//        viewPaint.getTextBounds(maxNumStr, 0, maxNumStr.length(), tempRect);
 
-        Rect tempRect = new Rect();
-        String maxNumStr = String.valueOf(maxNum);
-        viewPaint.getTextBounds(maxNumStr, 0, maxNumStr.length(), tempRect);
-        contentRect = new Rect(0, 0, (int) viewPaint.measureText(maxNumStr), tempRect.height());
+        contentRect = getNumRect(oldNum,newNum);
 
         if (iconDrawable != null) {
             int iconWidth = iconDrawable.getIntrinsicWidth();
@@ -239,16 +238,23 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
             float diffHeight = Math.abs(contentRect.height() - iconRect.height());
             contentRect.offset(0, Math.round(diffHeight * 0.5f));
         }
-
-        setSelected(true);
+        
 
     }
 
 
     private void drawIcon(Canvas canvas) {
+        if (debug) {
+            canvas.drawLine(iconRect.left, iconRect.top, iconRect.right, iconRect.top, viewPaint);
+            canvas.drawLine(iconRect.left, iconRect.bottom, iconRect.right, iconRect.bottom, viewPaint);
+        }
 
+        canvas.save();
+//        Matrix matrix = new Matrix();
+//        canvas.translate(iconRect.width() * 0.5f, iconRect.height() * 0.5f);
+        canvas.scale(1 - ratio, 1 - ratio, iconRect.width() * 0.5f, iconRect.height() * 0.5f);
         iconDrawable.draw(canvas);
-
+        canvas.restore();
     }
 
     private void drawAnimatorNum(Canvas canvas) {
@@ -324,6 +330,16 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
 
     }
 
+    private Rect getNumRect(int num1, int num2) {
+        int maxNum = Math.max(num1, num2);
+        Rect tempRect = new Rect();
+        Rect numRect;
+        String maxNumStr = String.valueOf(maxNum);
+        viewPaint.getTextBounds(maxNumStr, 0, maxNumStr.length(), tempRect);
+        numRect = new Rect(0, 0, (int) viewPaint.measureText(maxNumStr), tempRect.height());
+        return numRect;
+    }
+
     private void initAnimation() {
         List<Animator> animators = new ArrayList<>();
 
@@ -373,6 +389,7 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
             return;
         }
         this.newNum = newNum;
+        contentRect = getNumRect(oldNum,newNum);
         if (animation) {
             startAnimation();
         }
