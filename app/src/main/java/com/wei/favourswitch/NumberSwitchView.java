@@ -113,10 +113,10 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 //        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+//        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+//        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+//        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+//        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         int width = 0;
         int height = 0;
@@ -124,45 +124,58 @@ public class NumberSwitchView extends View implements Animator.AnimatorListener 
         int minWidth = getMinimumWidth();
         int minHeight = getMinimumHeight();
 
-        switch (widthMode) {
-            case MeasureSpec.UNSPECIFIED:
-            case MeasureSpec.AT_MOST: {
-                width = (int) contentRect.width() + getPaddingLeft() + getPaddingRight();
-                if (iconRect != null) {
-                    width += iconRect.width();
-                }
 
-                width = Math.max(width, minWidth);
-                break;
-            }
+//        switch (widthMode) {
+//            case MeasureSpec.UNSPECIFIED:
+//            case MeasureSpec.AT_MOST: {
+//                width = (int) contentRect.width() + getPaddingLeft() + getPaddingRight();
+//                if (iconRect != null) {
+//                    width += iconRect.width();
+//                }
+//
+//                width = Math.max(width, minWidth);
+//                break;
+//            }
+//
+//            case MeasureSpec.EXACTLY: {
+//                width = widthSize;
+//                break;
+//            }
+//
+//            default:
+//                break;
+//        }
 
-            case MeasureSpec.EXACTLY: {
-                width = widthSize;
-                break;
-            }
+//        switch (heightMode) {
+//            case MeasureSpec.UNSPECIFIED:
+//            case MeasureSpec.AT_MOST: {
+//                height = Math.round(fontHeight) + getPaddingTop() + getPaddingBottom();
+//                height = Math.max(height, iconRect.height());
+//                height = Math.max(height, minHeight);
+//                break;
+//            }
+//
+//            case MeasureSpec.EXACTLY: {
+//                height = heightSize;
+//                break;
+//            }
+//
+//            default:
+//                break;
+//        }
 
-            default:
-                break;
+        width = (int) contentRect.width() + getPaddingLeft() + getPaddingRight();
+        if (iconRect != null) {
+            width += iconRect.width();
         }
 
-        switch (heightMode) {
-            case MeasureSpec.UNSPECIFIED:
-            case MeasureSpec.AT_MOST: {
-                height = Math.round(fontHeight) + getPaddingTop() + getPaddingBottom();
-                height = Math.max(height, iconRect.height());
-                height = Math.max(height, minHeight);
-                break;
-            }
+        width = Math.max(width, minWidth);
+        width = resolveSize(width, widthMeasureSpec);
 
-            case MeasureSpec.EXACTLY: {
-                height = heightSize;
-                break;
-            }
-
-            default:
-                break;
-        }
-
+        height = Math.round(fontHeight) + getPaddingTop() + getPaddingBottom();
+        height = Math.max(height, iconRect.height());
+        height = Math.max(height, minHeight);
+        height = resolveSize(height, heightMeasureSpec);
 
         setMeasuredDimension(width, height);
     }
